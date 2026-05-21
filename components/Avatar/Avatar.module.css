@@ -1,0 +1,9 @@
+@reference "../../app/globals.css";
+
+.avatar {
+  @apply inline-flex items-center justify-center rounded-full font-bold text-sm select-none;
+  width: 2.5rem;
+  height: 2.5rem;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+  color: var(--color-dark);
+}
