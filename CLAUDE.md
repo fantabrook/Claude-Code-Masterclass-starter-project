@@ -18,73 +18,74 @@ npm run test       # Run Vitest suite (watch mode)
 
 To run a single test file:
 ```bash
-npx vitest tests/components/Navbar.test.tsx
+npx vitest run tests/components/Navbar.test.tsx
 ```
 
 ## Architecture
-
 
 ### Tech Stack
 - **Next.js 16** with App Router
 - **React 19** with TypeScript 5
 - **Tailwind CSS 4** + CSS Modules for styling
 - **Vitest** + React Testing Library for unit tests
- 
+- **lucide-react** — the only icon library in use; import icons from here
+
 ### Route Organization
- 
+
 The app uses Next.js **route groups** to organize related pages without affecting URLs:
- 
-- `app/(public)/` — Unauthenticated routes (splash, login, signup)
-- `app/(dashboard)/` — Authenticated routes (heists management)
-  - Has its own `layout.tsx` that includes the Navbar component
- 
-Routes automatically inherit their parent layout. The `(dashboard)` layout wraps all heist-related pages with the Navbar.
- 
+
+- `app/(public)/` — Unauthenticated routes (splash, login, signup); layout wraps content in `<main className="public">` which applies `text-4xl` to h1
+- `app/(dashboard)/` — Authenticated routes (heists management); layout includes the Navbar component
+
+Routes automatically inherit their parent layout.
+
 ### Import Aliases
- 
+
 TypeScript path alias `@/*` maps to project root:
 ```typescript
 import Navbar from "@/components/Navbar" // Instead of "../../../components/Navbar"
+```
 
 ### Styling Architecture
- 
+
 Multi-layered approach:
-◇
- 
+
 1. **Global Theme** (`app/globals.css`)
-  - Tailwind CSS v4 using `@theme` directive
-  - Custom color palette (purple/pink accents on dark background)
-  - Typography base styles (h1–h4, body)
-  - Utility classes (.page-content, .center-content, .form-title)
- 
+   - Tailwind CSS v4 using `@theme` directive
+   - Color palette: `--color-primary` (#C27AFF purple), `--color-secondary` (#FB64B6 pink), `--color-dark` (#030712), `--color-light` (#0A101D), `--color-lighter` (#101828), `--color-success` (#05DF72), `--color-error` (#FF6467), `--color-heading` (white), `--color-body` (#99A1AF)
+   - Utility classes: `.page-content`, `.center-content`, `.btn`, `.form-title`, `.preview-grid`
+
 2. **Component Styles** (e.g., `components/Navbar/Navbar.module.css`)
-  - CSS Modules for component-scoped styles
-  - Use `@reference` to access global theme variables
-  - Prevents style conflicts between components
- 
-3. **Tailwind Utilities** – Use inline for one-off styling needs
- 
+   - CSS Modules for component-scoped styles
+   - Use `@reference "../../app/globals.css"` at the top to access theme variables
+   - Combine multiple Tailwind utilities into named classes with `@apply`
+
+3. **Tailwind Utilities** — use inline only for a single class at most; anything requiring 2+ classes goes in a CSS Module
+
 ### Component Structure
- 
-Components follow barrel export pattern:
+
+Components follow the barrel export pattern:
 ```
 components/
-└── Navbar/
-    ├── Navbar.tsx          # Component implementation
-    ├── Navbar.module.css   # Scoped styles
-    └── index.ts          # Re-exports for clean imports
+└── AuthForm/
+    ├── AuthForm.tsx          # Component implementation
+    ├── AuthForm.module.css   # Scoped styles
+    └── index.ts              # export { default } from './AuthForm'
 ```
 
+Interactive components (useState, event handlers) require `"use client"` at the top of the file.
+
 ### Testing Setup
- 
+
 - Tests in `tests/` directory mirror `components/` structure
 - Vitest configured with jsdom environment and React Testing Library
-- Globals enabled (no need to import `describe`, `it`, `expect`)
-- Setup file: `vitest.setup.ts` imports `@testing-library/jest-dom`
- 
-## Additional Coding Preferences
- 
-- Do NOT use semicolons for JavaScript or TypeScript code.
-- Do NOT apply tailwind classes directly in component templates unless essential or just 1 at most. If an element needs more than a single tailwind class, combine them into a custom class using the `@apply` directive.
-- Use minimal project dependencies where possible.
-- Use the `git switch -c` command to switch to new branches, not `git checkout`.
+- Globals enabled (`describe`, `it`, `expect` available without imports — but `vi` must be imported)
+- Setup file: `vitest.setup.ts` imports `@testing-library/jest-dom/vitest`
+- Path aliases resolve in tests via `vite-tsconfig-paths` plugin
+
+## Coding Preferences
+
+- No semicolons in JavaScript or TypeScript
+- No more than 1 inline Tailwind class per element — use `@apply` in CSS Modules for anything more
+- Minimal dependencies — prefer the libraries already in use over adding new ones
+- Use `git switch -c` to create new branches
