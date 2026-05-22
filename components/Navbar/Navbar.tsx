@@ -1,4 +1,4 @@
-import { Clock8 } from "lucide-react";
+import { Clock8, Plus } from "lucide-react";
 import Link from "next/link";
 import styles from "./Navbar.module.css";
 
@@ -18,6 +18,7 @@ export default function Navbar() {
         <ul>
           <li>
             <Link href="/heists/create" className="btn">
+              <Plus size={16} />
               Create Heist
             </Link>
           </li>
